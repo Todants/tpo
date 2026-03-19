@@ -1,0 +1,97 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ make
+
+      - name: Build program
+        run: make
+
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fib-binary
+          path: fib
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fib-binary
+          path: .
+
+      - name: Make binary executable
+        run: chmod +x fib
+
+      - name: Install dependencies (for tests)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ make
+
+      - name: Run tests
+        run: |
+          chmod +x run_test.sh
+          ./run_test.sh
+
+  package:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fib-binary
+          path: .
+
+      - name: Make binary executable
+        run: chmod +x fib
+
+      - name: Create deb package structure
+        run: |
+          mkdir -p deb-package/usr/bin
+          cp fib deb-package/usr/bin/
+          mkdir -p deb-package/DEBIAN
+          cat > deb-package/DEBIAN/control << CONTROL_EOF
+Package: fib
+Version: 1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Your Name <your.email@example.com>
+Description: Fibonacci number calculator
+ This program computes the n-th Fibonacci number.
+CONTROL_EOF
+
+      - name: Build deb package
+        run: dpkg-deb --build deb-package fib_1.0_amd64.deb
+
+      - name: Upload deb package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fib-deb-package
+          path: fib_1.0_amd64.deb
+          retention-days: 7

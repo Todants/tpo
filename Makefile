@@ -1,8 +1,3 @@
-# Проверка наличия компилятора g++
-ifeq ($(shell which g++),)
-$(error "g++ not found. Please install g++ (build-essential)")
-endif
-
 TARGET = fib
 SOURCES = fib.cpp
 
@@ -14,4 +9,8 @@ $(TARGET): $(SOURCES)
 clean:
 	rm -f $(TARGET)
 
-.PHONY: all clean
+install:
+	mkdir -p $(DESTDIR)/usr/bin
+	install -m 755 $(TARGET) $(DESTDIR)/usr/bin/
+
+.PHONY: all clean install
