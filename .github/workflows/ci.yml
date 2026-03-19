@@ -75,16 +75,14 @@ jobs:
           mkdir -p deb-package/usr/bin
           cp fib deb-package/usr/bin/
           mkdir -p deb-package/DEBIAN
-          cat > deb-package/DEBIAN/control << CONTROL_EOF
-Package: fib
-Version: 1.0
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: Your Name <your.email@example.com>
-Description: Fibonacci number calculator
- This program computes the n-th Fibonacci number.
-CONTROL_EOF
+          echo "Package: fib" > deb-package/DEBIAN/control
+          echo "Version: 1.0" >> deb-package/DEBIAN/control
+          echo "Section: utils" >> deb-package/DEBIAN/control
+          echo "Priority: optional" >> deb-package/DEBIAN/control
+          echo "Architecture: amd64" >> deb-package/DEBIAN/control
+          echo "Maintainer: Your Name <your.email@example.com>" >> deb-package/DEBIAN/control
+          echo "Description: Fibonacci number calculator" >> deb-package/DEBIAN/control
+          echo " This program computes the n-th Fibonacci number." >> deb-package/DEBIAN/control
 
       - name: Build deb package
         run: dpkg-deb --build deb-package fib_1.0_amd64.deb
