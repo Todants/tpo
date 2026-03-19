@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <unistd.h>
 
 unsigned long long fibonacci(unsigned int n) {
     if (n == 0) return 0;
@@ -19,15 +20,17 @@ int main(int argc, char* argv[]) {
 
     if (argc >= 2) {
         n = std::atoi(argv[1]);
+        std::cout << fibonacci(n) << std::endl;
     } else {
-        std::cout << "Введите n: ";
+        if (isatty(STDIN_FILENO)) {
+            std::cout << "Введите n: ";
+        }
         std::cin >> n;
         if (std::cin.fail()) {
             std::cerr << "Ошибка ввода" << std::endl;
             return 1;
         }
+        std::cout << fibonacci(n) << std::endl;
     }
-
-    std::cout << "F(" << n << ") = " << fibonacci(n) << std::endl;
     return 0;
 }
